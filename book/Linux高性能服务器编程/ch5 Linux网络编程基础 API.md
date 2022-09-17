@@ -10,3 +10,15 @@
 ## 5.5 接受连接
 
 1. 把执行过 listen 调用，处于 LISTEN 状态的 socket 称为监听 socket，而所有处于 ESTABLISHED 状态的 socket 则称为连接 socket
+
+## 5.11 socket 选项
+
+### 5.11.2 SO_RCVBUF 和 SO_SNDBUF 选项
+
+1. SO_RCVBUF 和 SO_SNDBUF 选项分别表示 TCP 接收缓冲区和发送缓冲区的大小。不过，当我们用 setsockopt 来设置 TCP 的接收缓冲区和发送缓冲区的大小时，系统都会将其值加倍
+
+### 5.11.3 SO_RCVLOWAT 和 SO_SNDLOWAT 选项
+
+1. SO_RCVLOWAT 和 SO_SNDLOWAT 选项分别表示 TCP 接收缓冲区和发送缓冲区的低水位标记。它们一般被 I/O 复用系统调用用来判断 socket 是否可读或可写
+2. 当 TCP 接收缓冲区中可读数据的总数大于其低水位标记时，I/O 复用系统调用将通知应用程序可以从对应的 socket 上读取数据；当 TCP 发送缓冲区中的空闲空间（可以写入数据的空间）大于其低水位标记时，I/O 复用系统调用将通知应用程序可以往对应的 socket 上写入数据
+3. 默认情况下，TCP 接收（发送）缓冲区的低水位标记均为 1 字节
