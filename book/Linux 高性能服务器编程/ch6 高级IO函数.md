@@ -21,6 +21,18 @@
     成功返回0，失败返回-1并设置 errno
     ```
 
+## 6.2 dup 函数和 dup2 函数
+
+1. 有时我们希望把标准输入重定向到一个文件，或者把标准输出重定向到一个网络连接
+
+    ```cpp
+    #include <unistd.h>
+    int dup(int file_descriptor);
+    int dup2(int file_descriptor_one, int file_descriptor_two);
+    ```
+
+2. `dup` 函数创建一个新的文件描述符，该新文件描述符和原有文件描述符 `file_descriptor` 指向相同的文件、管道或网络连接
+
 ## 6.3 readv 函数和 writev 函数
 
 1. readv 函数将数据从文件描述符读到分散的内存块中，即分散读
@@ -34,7 +46,7 @@
     iovec: 结构体，描述一块内存区
     count: vector 数组的长度
 
-    函数成功返回读出（写入）fd 的字节数，失败返回-1并设置 errno
+    函数成功返回读出（写入）fd的字节数，失败返回-1并设置errno
     ```
 
 ## 6.4 sendfile 函数
@@ -91,10 +103,19 @@
     off_in: 当fd_in不是管道文件描述符时，off_in被设置为NULL表示从输入数据流的当前偏移位置读入，off_in不为NULL，则它将指出具体的偏移位置
     fd_out/off_out: 含义与fd_in/off_in相同，不过用于输出数据流
     len: 指定移动数据的长度
-    flags: 控制数据如何移动
+    flags: 控制数据如何移动，可以被设置为下表某些值的**按位或**
 
     成功返回移动字节的数量，失败返回-1并设置errno
     ```
+
+3. 表6-2 splice 的 flags 参数的常用值及其含义
+
+    |       常用值       |       含义      |
+    | :----------------:|:--------------:|
+    | SPLICE_F_MOVE     | 如果合适的话，按整页内存移动数据。这只是给内核的一个提示。不过，因为它的实现存在 BUG，所以自内核 2.6.21 后，它实际上没有任何效果 |
+    | SPLICE_F_NONBLOCK | 非阻塞的 splice 操作，但实际效果还会受文件描述符本身的阻塞状态的影响 |
+    | SPLICE_F_MORE     | 给内核一个提示：后续的 splice 调用将读取更多的数据 |
+    | SPLICE_F_GIFT     | 对 splice 没有效果 |
 
 ## 6.7 tee 函数
 
