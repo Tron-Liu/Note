@@ -1,0 +1,62 @@
+/**
+ * @file test1.cpp
+ * @author Tron-Liu (Tron-Liu@foxmail.com)
+ * @brief 使用 SO_SNDTIMEO 选项来定时
+ * @version 0.1
+ * @date 2022-09-21
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
+
+#include <arpa/inet.h>
+#include <assert.h>
+#include <libgen.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+
+// 超时连接函数
+int timeout_connect(const char *ip, int port, int time)
+{
+    int ret = 0;
+    struct sockaddr_in address;
+    bzero(&address, sizeof(address));
+    address.sin_family = AF_INET;
+    inet_pton(AF_INET, ip, &address.sin_addr);
+    address.sin_port = htons(port);
+
+    int sockfd = socket(PF_INET, SOCK_STREAM, 0);
+    assert(sockfd >= 0);
+
+    struct timeval timeout;
+    timeout.tv_sec = time;
+    timeout.tv_usec = 0;
+    socklen_t len = sizeof(timeout);
+
+    ret = setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, len);
+    assert(ret != -1);
+
+    ret = connect(sockfd, (struct sockaddr *)&address, sizeof(address));
+    if (ret == -1)
+    {
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc <= 2)
+    {
+        printf("usage: %s ip_address port_number.\n", basename(argv[0]));
+        return 1;
+    }
+
+    const char *ip = argv[1];
+    int port = atoi(argv[2]);
+
+    int sockfd = timeout_connect(ip, port, 0);
+
+    return 0;
+}
