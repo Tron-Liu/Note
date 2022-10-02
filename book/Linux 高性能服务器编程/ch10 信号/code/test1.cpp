@@ -72,56 +72,13 @@ void addsig(int sig) {
   struct sigaction sa;
   memset(&sa, '\0', sizeof(sa));
   sa.sa_handler = sig_handler;
+  
+  // SA_RESTART: 重新调用被该信号终止的系统调用
   sa.sa_flags |= SA_RESTART;
 
-  /**
-   * 信号集函数
-   * int sigemptyset(sigset_t* _set)  // 清空信号集
-   * int sigfillset(sigset_t* _set)   // 在信号集中设置所有信号
-   * int sigaddset(sigset_t* _set, int _signo)   // 将信号 _signo 添加至信号集中
-   * int sigdelset(sigset_t* _set, int _signo)   // 将信号 _signo 从信号集中删除
-   * int sigismember(_const sigset_t* _set, int _signo)   // 测试 _signo
-   * 是否在信号集中
-   */
   sigfillset(&sa.sa_mask);
   assert(sigaction(sig, &sa, NULL) != -1);
 }
-
-/**
- * int sigaction(int sig, const struct sigaction* act, struct sigaction* oact);
- * sig: 指出要捕获的信号类型
- * act: 指定新的信号处理方式
- * oact: 输出信号先前的处理方式 (如果不为 NULL 的话)
- *
- * 成功时返回 0，失败则返回 -1 并设置 errno
- */
-
-/**
- * struct sigaction {
- * #ifdef __USE_POSIX199309
- *   union {
- *     _sighandler_t sa_handler;
- *     void (*sa_sigaction) (int, siginfo_t*, void*);
- *   }
- *   _sigaction_handler;
- * #define sa_handler    __sigaction_handler.sa_handler
- * #define sa_sigaction  __sigaction_handler.sa_sigaction
- * #else
- *   _sighandler sa_handler;
- * #endif
- *
- *   _sigset_t sa_mask;
- *   int sa_flags;
- *   void (*sa_restorer) (void);
- * }
- *
- * sa_handler: 指定信号处理函数
- * sa_mask:
- * 设置进程的信号掩码（确切地说是在进程原有信号掩码的基础上增加信号掩码）
- *   sigset_t: 信号集类型(_sigset_t的同义词)，该类型指定一组信号
- * sa_flags: 设置程序收到信号时的行为
- *   SA_RESTART: 重新调用被该信号终止的系统调用
- */
 
 int main(int argc, char* argv[]) {
   if (argc <= 2) {
