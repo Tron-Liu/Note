@@ -17,7 +17,7 @@ class SortTimerLst {
   void tick();
 
  private:
-  void add_timer(UtilTimer* timer, UtilTimer* lst_head){};
+  void add_timer(UtilTimer* timer, UtilTimer* lst_head);
 
  private:
   UtilTimer* head;
