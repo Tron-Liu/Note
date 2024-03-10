@@ -1,3 +1,0 @@
-# FoldingNet
-
-## 作用
