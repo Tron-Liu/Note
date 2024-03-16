@@ -1,7 +1,7 @@
 /**
  * @file: 5-1.c
  * @author: Tron-Liu (Tron-Liu@foxmail.com)
- * @brief:
+ * @brief: 判断机器字节序
  * @date: 2022-09-15
  *
  * @copyright Copyright (c) 2022

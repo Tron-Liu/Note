@@ -1,7 +1,7 @@
 /**
  * @file: 5-7.c
  * @author: Tron-Liu (Tron-Liu@foxmail.com)
- * @brief:
+ * @brief: 接收带外数据
  * @date: 2022-09-16
  *
  * @copyright Copyright (c) 2022
