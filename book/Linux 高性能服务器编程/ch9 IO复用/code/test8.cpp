@@ -1,11 +1,7 @@
 /**
  * @file: test8.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 同时处理 TCP 请求和 UDP 请求的回射服务器
  * @date: 2022-09-20
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 #include <arpa/inet.h>

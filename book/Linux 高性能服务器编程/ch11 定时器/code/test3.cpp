@@ -1,13 +1,9 @@
 /**
  * @file test3.cpp
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 关闭非活动连接，利用 alarm 函数周期性地触发 SIGALRM 信号，该
  *        信号的信号处理函数利用管道通知主循环执行定时器链表上的定时任务，即关闭非活动的连接
  * @version 0.1
  * @date 2022-10-03
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 #include <arpa/inet.h>

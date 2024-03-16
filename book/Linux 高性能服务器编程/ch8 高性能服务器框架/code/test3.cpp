@@ -1,12 +1,8 @@
 /**
  * @file 8-3.cpp
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief HTTP 请求的读取和分析
  * @version 0.1
  * @date 2022-09-09
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 // HTTP 协议并未提供头部长度字段。根据协议规定，我们判断 HTTP 头部结束的依据是

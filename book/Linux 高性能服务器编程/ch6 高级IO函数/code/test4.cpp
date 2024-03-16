@@ -1,10 +1,8 @@
 /**
  * @file test4.cpp
- * @author
  * @brief 使用 splice 函数实现的回射服务器
  * @version 0.1
  * @date 2024-03-16
- *
  */
 
 #include <arpa/inet.h>

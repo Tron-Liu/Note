@@ -1,10 +1,8 @@
 /**
  * @file test1.cpp
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 按不同顺序访问互斥锁导致死锁
  * @version 0.1
  * @date 2022-09-29
- *
  */
 
 #include <pthread.h>

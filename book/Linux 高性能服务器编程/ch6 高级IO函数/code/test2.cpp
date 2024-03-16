@@ -1,10 +1,7 @@
 /**
  * @file: test2.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: Web 服务器上的集中写
  * @date: 2022-09-17
- *
- * @copyright Copyright (c) 2022
  */
 
 #include <arpa/inet.h>

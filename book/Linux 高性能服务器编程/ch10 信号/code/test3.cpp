@@ -1,12 +1,8 @@
 /**
  * @file test3.cpp
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 用 SIGURG 检测带外数据是否达到
  * @version 0.1
  * @date 2022-10-02
- * 
- * @copyright Copyright (c) 2022
- * 
  */
 
 #include <arpa/inet.h>

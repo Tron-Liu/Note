@@ -1,12 +1,8 @@
 /**
  * @file 10-1.c
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 统一事件源
  * @version 0.1
  * @date 2022-09-13
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 #include <arpa/inet.h>

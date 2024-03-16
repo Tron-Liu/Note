@@ -1,11 +1,7 @@
 /**
  * @file: test1.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 同时接收普通数据和带外数据
  * @date: 2022-09-09
- *
- * @copyright Copyright (c) 2022
- *
  **/
 
 #include <arpa/inet.h>

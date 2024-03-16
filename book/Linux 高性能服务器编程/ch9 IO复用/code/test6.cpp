@@ -1,11 +1,7 @@
 /**
  * @file: test6.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 聊天室客户端程序
  * @date: 2022-09-12
- *
- * @copyright Copyright (c) 2022
- *
  **/
 
 #define _GNU_SOURCE 1

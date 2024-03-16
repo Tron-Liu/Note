@@ -1,12 +1,8 @@
 /**
  * @file 15-1.h
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 半同步/半异步进程池
  * @version 0.1
  * @date 2022-09-14
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 #ifndef PROCESSPOOL_H

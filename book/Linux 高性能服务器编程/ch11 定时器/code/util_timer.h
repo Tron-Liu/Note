@@ -1,11 +1,7 @@
 /**
  * @file: test2.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 升序定时器链表
  * @date: 2022-09-21
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 #ifndef LST_TIMER

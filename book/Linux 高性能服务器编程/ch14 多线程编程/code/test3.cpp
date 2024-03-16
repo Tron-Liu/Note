@@ -1,12 +1,8 @@
 /**
  * @file test3.cpp
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 在多线程程序中调用 fork 函数
  * @version 0.1
  * @date 2022-09-28
- * 
- * @copyright Copyright (c) 2022
- * 
  */
 
 #include <pthread.h>

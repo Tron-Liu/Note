@@ -1,11 +1,7 @@
 /**
  * @file: test5.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 同时输出数据到终端和文件的程序
  * @date: 2022-09-19
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 #include <assert.h>

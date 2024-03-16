@@ -1,10 +1,7 @@
 /**
  * @file: test1.c
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: CGI 服务器原理
  * @date: 2022-09-17
- *
- * @copyright Copyright (c) 2022
  **/
 
 #include <arpa/inet.h>

@@ -1,7 +1,6 @@
 /**
  * @file: backlog_param.c
  * @author: Tron-Liu (Tron-Liu@foxmail.com)
- * @brief: 接受一个异常的连接
  * @date: 2022-09-08 09:47
  **/
 

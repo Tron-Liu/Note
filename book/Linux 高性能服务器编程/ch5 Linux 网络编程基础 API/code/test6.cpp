@@ -1,11 +1,7 @@
 /**
  * @file: 5-6.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 发送带外数据
  * @date: 2022-09-15
- *
- * @copyright Copyright (c) 2022
- *
  **/
 
 #include <arpa/inet.h>

@@ -1,11 +1,7 @@
 /**
  * @file: 5-11.c
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 修改 TCP 接收缓冲区的服务器程序
  * @date: 2022-09-16
- *
- * @copyright Copyright (c) 2022
- *
  **/
 
 #include <arpa/inet.h>

@@ -1,12 +1,8 @@
 /**
  * @file test4.cpp
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 使用共享内存的聊天室服务器程序
  * @version 0.1
  * @date 2024-03-10
- *
- * @copyright Copyright (c) 2024
- *
  */
 
 #include <arpa/inet.h>

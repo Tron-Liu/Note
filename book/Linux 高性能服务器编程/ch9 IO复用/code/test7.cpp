@@ -1,11 +1,7 @@
 /**
  * @file: test7.cpp
- * @author: Tron-Liu (Tron-Liu@foxmail.com)
  * @brief: 聊天室服务器程序
  * @date: 2022-09-19
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 // 服务器程序使用 poll 同时监听 socket 和连接 socket，并且使用

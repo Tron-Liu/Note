@@ -1,12 +1,8 @@
 /**
  * @file test1.cpp
- * @author Tron-Liu (Tron-Liu@foxmail.com)
  * @brief 使用 SO_SNDTIMEO 选项来定时
  * @version 0.1
  * @date 2022-09-21
- *
- * @copyright Copyright (c) 2022
- *
  */
 
 #include <arpa/inet.h>
