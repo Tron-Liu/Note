@@ -84,3 +84,82 @@
     | 事件 | 描述 | 是否可作为输入 | 是否可作为输出 |
     |:--- |:--- |:------------ |:----------- |
     | POLLIN | 数据（包括普通数据和优先数据）| 是 | 是 |
+  
+## 9.3 epoll 系列系统调用
+
+### 9.3.1 内核事件表
+
+1. `epoll` 是 Linux 特有的 I/O 复用函数。它在实现和使用上与 `select`、`poll` 有很大差异
+   * 首先，`epoll` 使用一组函数来完成任务，而不是单个函数
+   * 其次，`epoll` 把用户关心的文件描述符上的事件放在内核里的一个事件表中，从而无需像 `select` 和 `poll` 那样每次调用都要重复传入文件描述符集或事件集
+   * `epoll` 需要使用一个额外的文件描述符来唯一标识内核中的事件表，这个文件描述符由 `epoll_create` 创建
+2. `epoll_create` 函数定义如下：
+
+   ```c
+   #include <sys/epoll.h>
+
+   int epoll_create(int size)
+   ```
+
+3. `epoll_ctl` 操作 `epoll` 的内核事件表，函数原型如下：
+
+   ```c
+   #include <epoll.h>
+
+   int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event)
+
+   fd: 要操作的文件描述符
+   op: 指定操作类型
+   event: 指定事件
+
+   成功返回 0，失败则返回 -1 并设置 errno
+   ```
+
+4. `op` 参数的操作类型
+
+   ```c
+   EPOLL_CTL_ADD: 往事件表中注册 fd 上的事件
+   EPOLL_CTL_MOD: 修改 fd 上的注册事件
+   EPOLL_CTL_DEL: 删除 fd 上的注册事件
+   ```
+
+5. `epoll_event` 定义如下：
+
+   ```c
+   struct epoll_event {
+     __uint32_t events;    // epoll 事件
+     epoll_data_t data;    // 用户数据
+   }
+
+   typedef union epoll_data {
+     void* ptr;
+     int fd;
+     uint32_t u32;
+     uint64_t u64;
+   } epoll_data_t;
+
+   fd: 指定事件所从属的目标文件描述符
+   ptr: 指定与 fd 相关的用户数据
+   ```
+
+### 9.3.2 epoll_wait 函数
+
+1. `epoll_wait` 函数在一段超时时间内等待一组文件描述符上的事件，原型如下：
+
+   ```c
+   #include <sys/epoll.h>
+
+   int epoll_wait(int epfd, struct epoll_event* events, int maxevents, int timeout)
+
+   epfd: 指定内核事件表
+   maxevents: 最多监听多少个事件
+
+   函数成功返回就绪的文件描述符的个数，失败时返回-1并设置errno
+   ```
+
+2. `epoll_wait` 函数如果检测到事件，就将所有就绪的事件从内核事件表（由 `epfd` 参数指定）中复制到它的第二个参数 `events` 指向的数组中。这个数组只用于输出 `epoll_wait` 检测到的就绪事件
+
+### 9.3.3 LT 和 ET 模式
+
+1. `epoll` 对文件描述符的操作有两种模式 `LT` 模式和 `ET` 模式
+   * LT: Level Trigger，电平触发。该模式是默认的工作模式

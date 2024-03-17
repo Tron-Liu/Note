@@ -12,18 +12,20 @@
 
 ### 7.1.1 Linux 系统日志
 
+1. rsyslogd 守护进程既能接受用户进程输出的日志，又能接受日志。用户进程是通过调用 syslog 函数生成系统日志的，该函数将日志输出到一个 UNIX 本地域 socket 类型的文件 /dev/log 中，rsyslogd 则监听该文件以获取用户进程的输出。rsyslogd 守护进程在接收到用户进程或内核输入的日志后，会把它们输出到某些特定的日志文件
+
 ### 7.1.2 syslog 函数
 
-1. 应用程序使用 `syslog` 函数与 `rsyslogd` 守护进程通信。
-2. `syslog` 函数的定义如下：
+1. 应用程序使用 `syslog` 函数与 `rsyslogd` 守护进程通信，`syslog` 函数的定义如下：
 
     ```c
     #include <syslog.h>
 
+    // priority: 设施值（LOG_USER）与日志级别的按位或
     void syslog(int priority, const char* message, ...);
     ```
 
-3. 日志级别
+2. 日志级别
 
     ```c
     #include <syslog.h>
@@ -38,93 +40,142 @@
     #define LOG_DEBUG     7  // 调试
     ```
 
-4. 改变 syslog 的默认输出方式，进一步结构化日志内容
+3. 改变 syslog 的默认输出方式，进一步结构化日志内容
 
     ```c
     #include <syslog.h>
 
+    //    ident: 指定的字符串将被添加到日志消息的日期和时间之后，通常被设置为程序的名字
+    //   logopt: 对后续 syslog 调用的行为进行配置，可取下列值的按位或
+    //           #define LOG_PID     0x01    // 在日志消息中包含程序 PID
+    //           #define LOG_CONS    0x02    // 如果消息不能记录到日志文件，则打印至终端
+    //           #define LOG_ODELAY  0x04    // 延迟打开日志给你直到第一次调用 syslog
+    //           #define LOG_NDELAY  0x08    // 不延迟打开日志功能
+    // facility: 可用来修改 syslog 函数中的默认设施值
     void openlog(const char* ident, int logopt, int facility);
 
-    facility: 可用来修改syslog函数中的默认设施值
     ```
 
-## 9.2 poll 系统调用
-
-## 9.3 epoll 系列系统调用
-
-### 9.3.1 内核事件表
-
-1. `epoll` 是 Linux 特有的 I/O 复用函数。它在实现和使用上与 `select`、`poll` 有很大差异
-   * 首先，`epoll` 使用一组函数来完成任务，而不是单个函数
-   * 其次，`epoll` 把用户关心的文件描述符上的事件放在内核里的一个事件表中，从而无需像 `select` 和 `poll` 那样每次调用都要重复传入文件描述符集或事件集
-   * `epoll` 需要使用一个额外的文件描述符来唯一标识内核中的事件表，这个文件描述符由 `epoll_create` 创建
-2. `epoll_create` 函数定义如下：
+4. 设置 syslog 的日志掩码
 
    ```c
-   #include <sys/epoll.h>
+   #include <syslog.h>
 
-   int epoll_create(int size)
+   // maskpri: 设置日志掩码值，该函数始终会成功，它返回调用进程先前的日志掩码值
+   int setlogmask(int maskpri);
    ```
 
-3. `epoll_ctl` 操作 `epoll` 的内核事件表，函数原型如下：
+5. 关闭日志功能
 
    ```c
-   #include <epoll.h>
+   #include <syslog.h>
 
-   int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event)
-
-   fd: 要操作的文件描述符
-   op: 指定操作类型
-   event: 指定事件
-
-   成功返回 0，失败则返回 -1 并设置 errno
+   void closelog();
    ```
 
-4. `op` 参数的操作类型
+## 7.2 用户信息
+
+### 7.2.1 UID、EUID、GID 和 EGID
+
+1. 获取和设置当前进程的真实用户ID（UID）、有效ID（EUID）、真实组ID（GID）和有效组ID（EGID）
 
    ```c
-   EPOLL_CTL_ADD: 往事件表中注册 fd 上的事件
-   EPOLL_CTL_MOD: 修改 fd 上的注册事件
-   EPOLL_CTL_DEL: 删除 fd 上的注册事件
+   #include <sys/types.h>
+   #include <unistd.h>
+
+   uid_t  getuid();
+   uid_t geteuid();
+   gid_t  getgid();
+   gid_t getegid();
+   int  setuid(uid_t uid);
+   int seteuid(uid_t uid);
+   int  setgid(gid_t gid);
+   int setegid(gid_t gid);
    ```
 
-5. `epoll_event` 定义如下：
+2. EUID 存在的目的是方便资源访问，对于 set-user-id 程序而言，程序的 EUID 会变成程序所有者的 UID
+
+## 7.3 进程间关系
+
+### 7.3.1 进程组
+
+1. Linux 下每个进程都隶属于一个进程组，因此它们除了 PID 信息外，还有进程组 ID（PGID）
 
    ```c
-   struct epoll_event {
-     __uint32_t events;    // epoll 事件
-     epoll_data_t data;    // 用户数据
+   #include <unistd.h>
+   
+   // 获取指定进程的 PGID
+   pid_t getpgid(pid_t pid);
+   // 成功返回进程 pid 所属进程组的 PGID，失败则返回 -1 并设置 errno
+
+   // 设置 PGID，将 PID 为 pid 的进程的 PGID 设置为 pid
+   // 如果 pid == pgid，则由 pid 指定的进程将被设置为进程组首领
+   int setpgid(pid_t pid, pid_t pgid);
+   // 成功返回 0，失败则返回 -1 并设置 errno
+
+   // 一个进程只能设置自己或者其子进程的 PGID。
+   // 并且，当子进程调用 exec 系列函数后，也不能再在父进程中对它设置 PGID
+   ```
+
+2. 每个进程组都有一个首领进程，其 PID 与 PGID 相同。进程组将一直存在，直到其中所有进程都退出，或者加入到其他进程组
+
+### 7.3.2 会话
+
+1. 一些有关联的进程组将形成一个绘画（session）
+
+   ```c
+   #include <unistd.h>
+
+   pid_t setsid(void);
+   // 该函数不能由进程组的首领进程调用，否则将产生一个错误
+   // 对于非组首领的进程，调用该函数不仅创建新会话，而且会有如下额外效果：
+   //    调用进程会成为会话的首领，此时该进程是新会话的唯一成员
+   //    新建一个进程组，其 PGID 就是调用进程的 PID，调用进程成为该组的首领
+   //    调用进程将甩开终端（如果有的话）
+
+   // 该函数成功时返回新的进程组 PGID，失败则返回 -1 并设置 errno
+
+   // 读取 SID
+   pid_t getsid(pid_t pid);
+   ```
+
+## 7.4 系统资源限制
+
+1. 获取和设置 Linux 系统资源限制的函数对：
+
+   ```c
+   #include <sys/resource.h>
+
+   int getrlimit(int resource, struct rlimit *rlim);
+   int setrlimit(int resource, const struct rlimit *rlim);
+
+   struct rlimit {
+     rlim_t rlim_cur;
+     rlim_t rlim_max;
    }
-
-   typedef union epoll_data {
-     void* ptr;
-     int fd;
-     uint32_t u32;
-     uint64_t u64;
-   } epoll_data_t;
-
-   fd: 指定事件所从属的目标文件描述符
-   ptr: 指定与 fd 相关的用户数据
+   // rlim_t: 整数类型，描述资源级别
+   // rlim_cur: 指定资源的软限制（建议性的，最好不要超越的限制，超越的话，系统可能向进程发送信号以终止其运行）
+   // rlim_max: 指定资源的硬限制，普通程序可以减少硬限制，root 身份运行的程序才能增加硬限制
    ```
 
-### 9.3.2 epoll_wait 函数
+## 7.5 改变工作目录和根目录
 
-1. `epoll_wait` 函数在一段超时时间内等待一组文件描述符上的事件，原型如下：
+1. 获取和改变进程工作目录的函数对：
 
    ```c
-   #include <sys/epoll.h>
+   #include <unistd.h>
 
-   int epoll_wait(int epfd, struct epoll_event* events, int maxevents, int timeout)
-
-   epfd: 指定内核事件表
-   maxevents: 最多监听多少个事件
-
-   函数成功返回就绪的文件描述符的个数，失败时返回-1并设置errno
+   char* getcwd(char* buf, size_t size);
+   int chdir(const char* path);
    ```
 
-2. `epoll_wait` 函数如果检测到事件，就将所有就绪的事件从内核事件表（由 `epfd` 参数指定）中复制到它的第二个参数 `events` 指向的数组中。这个数组只用于输出 `epoll_wait` 检测到的就绪事件
+2. 改变进程根目录的函数：
 
-### 9.3.3 LT 和 ET 模式
+   ```c
+   #include <unistd.h>
 
-1. `epoll` 对文件描述符的操作有两种模式 `LT` 模式和 `ET` 模式
-   * LT: Level Trigger，电平触发。该模式是默认的工作模式
+   int chroot(const char* path);
+   ```
+
+3. chroot 并不改变进程的当前工作目录，所以调用 chroot 之后，仍然需要使用 chdir("/") 来将工作目录切换至新的根目录。改变进程的根目录之后，程序可能无法访问类似 /dev 的文件（和目录），因为这些文件（和目录）并非处于新的根目录之下，不过可以利用进程原先打开的文件描述符来访问调用 chroot 之后不能直接访问的文件（和目录）
+4. 只有特权进程才能改变跟目录
