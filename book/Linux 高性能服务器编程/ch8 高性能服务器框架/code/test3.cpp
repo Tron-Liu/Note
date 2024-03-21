@@ -63,8 +63,8 @@ LINE_STATUS parse_line(char* buffer, int& checked_index, int& read_index) {
       if ((checked_index + 1) == read_index) return LINE_OPEN;
       // 如果下一个字符是 "\n", 则说明我们成功读取到一个完整的行
       else if (buffer[checked_index + 1] == '\n') {
-        buffer[checked_index++] = '\0';
-        buffer[checked_index++] = '\0';
+        buffer[checked_index++] = '\0';    // replace '\r' to '\0'
+        buffer[checked_index++] = '\0';    // repalce '\n' to '\0'
         return LINE_OK;
       }
       // 否则的话，说明客户发送的 HTTP 请求存在语法问题

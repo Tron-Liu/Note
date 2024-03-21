@@ -19,17 +19,16 @@
     ```c
     #include <sys/select.h>
 
+    // nfds: 指定被监听的文件描述符的总数。通常被设置为 select 监听的所有文件描述符中的最大值加 1
+    // readfds: 指向可读事件对应的文件描述符
+    // writefds: 指向可写事件对应的文件描述符
+    // exceptfds: 指向异常事件对应的文件描述符
+    // timeout: 设置select函数的超时时间
     int select(int nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptfds, struct timeval* timeout);
 
-    nfds: 指定被监听的文件描述符的总数。通常被设置为select监听的所有文件描述符中的最大值加1
-    readfds: 指向可读事件对应的文件描述符
-    writefds: 指向可写事件对应的文件描述符
-    exceptfds: 指向异常事件对应的文件描述符
-    timeout: 设置select函数的超时时间
-
-    成功返回就绪（可读、可写和异常）文件描述符的总数
-    失败返回-1并设置errno
-    如果在超时时间内没有任何文件描述符就绪，返回0
+    // 成功返回就绪（可读、可写和异常）文件描述符的总数
+    // 失败返回 -1 并设置 errno 为 EINTR
+    // 如果在超时时间内没有任何文件描述符就绪，返回 0
     ```
 
 2. 访问结构体 fd_set 的宏
@@ -66,10 +65,15 @@
     ```c
     #inlucde <poll.h>
 
-    int poll(struct pollfd* fds, )
+    // nfds: 指定被监听事件集合 fds 的大小
+    //       typedef unsigned long int nfds_t;
+    // timeout: 指定 poll 的超时值，单位是毫秒
+    //       当 timeout 为 -1 时，poll 调用将永远阻塞，直到某个事件发生
+    //       当 timeout 为 0 时，poll 调用将立即返回
+    int poll(struct pollfd* fds, nfds_t nfds, int timeout)
     ```
 
-3. `pollfds` 结构体的定义如下
+3. `pollfd` 结构体的定义如下
 
     ```c
     struct pollfd {
@@ -83,7 +87,10 @@
 
     | 事件 | 描述 | 是否可作为输入 | 是否可作为输出 |
     |:--- |:--- |:------------ |:----------- |
-    | POLLIN | 数据（包括普通数据和优先数据）| 是 | 是 |
+    | POLLIN | 数据（包括普通数据和优先数据）可读 | 是 | 是 |
+    | POLLRDNORM | 普通数据可读 | 是 | 是 |
+    | POLLRDBAND | 优先级带数据可读（Linux 不支持）| 是 | 是 |
+    | POLLPRI | | | |
   
 ## 9.3 epoll 系列系统调用
 
@@ -98,6 +105,8 @@
    ```c
    #include <sys/epoll.h>
 
+   // 函数返回值的文件描述符将用作其他所有 epoll 系统调用的第一个参数
+   // 以及指定要访问的内核事件表
    int epoll_create(int size)
    ```
 
@@ -106,24 +115,18 @@
    ```c
    #include <epoll.h>
 
+   // fd: 要操作的文件描述符
+   // op: 指定操作类型
+   //     EPOLL_CTL_ADD: 往事件表中注册 fd 上的事件
+   //     EPOLL_CTL_MOD: 修改 fd 上的注册事件
+   //     EPOLL_CTL_DEL: 删除 fd 上的注册事件
+   // event: 指定事件
    int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event)
 
-   fd: 要操作的文件描述符
-   op: 指定操作类型
-   event: 指定事件
-
-   成功返回 0，失败则返回 -1 并设置 errno
+   // 成功返回 0，失败则返回 -1 并设置 errno
    ```
 
-4. `op` 参数的操作类型
-
-   ```c
-   EPOLL_CTL_ADD: 往事件表中注册 fd 上的事件
-   EPOLL_CTL_MOD: 修改 fd 上的注册事件
-   EPOLL_CTL_DEL: 删除 fd 上的注册事件
-   ```
-
-5. `epoll_event` 定义如下：
+4. `epoll_event` 定义如下：
 
    ```c
    struct epoll_event {
@@ -132,14 +135,11 @@
    }
 
    typedef union epoll_data {
-     void* ptr;
-     int fd;
+     void* ptr;       // 指定与 fd 相关的用户数据
+     int fd;          // 指定事件所从属的目标文件描述符
      uint32_t u32;
      uint64_t u64;
    } epoll_data_t;
-
-   fd: 指定事件所从属的目标文件描述符
-   ptr: 指定与 fd 相关的用户数据
    ```
 
 ### 9.3.2 epoll_wait 函数
@@ -149,12 +149,11 @@
    ```c
    #include <sys/epoll.h>
 
+   //      epfd: 指定内核事件表
+   // maxevents: 最多监听多少个事件，必须大于 0
    int epoll_wait(int epfd, struct epoll_event* events, int maxevents, int timeout)
 
-   epfd: 指定内核事件表
-   maxevents: 最多监听多少个事件
-
-   函数成功返回就绪的文件描述符的个数，失败时返回-1并设置errno
+   // 函数成功返回就绪的文件描述符的个数，失败时返回 -1 并设置 errno
    ```
 
 2. `epoll_wait` 函数如果检测到事件，就将所有就绪的事件从内核事件表（由 `epfd` 参数指定）中复制到它的第二个参数 `events` 指向的数组中。这个数组只用于输出 `epoll_wait` 检测到的就绪事件
@@ -162,4 +161,6 @@
 ### 9.3.3 LT 和 ET 模式
 
 1. `epoll` 对文件描述符的操作有两种模式 `LT` 模式和 `ET` 模式
-   * LT: Level Trigger，电平触发。该模式是默认的工作模式
+   * LT: Level Trigger，电平触发。该模式是默认的工作模式，这种模式下 epoll 相当于一个效率较高的 poll
+   * ET: Edge Trigger，边沿触发。当往 epoll 内核事件表中注册一个文件描述符上的 EPOLLET 事件是，epoll 将以 ET 模式来操作该文件描述符。ET 模式是 epoll 的高效工作模式
+2. 对于采用 LT 工作模式的文件描述符，当 epoll_wait 检测到其上有事件发生并将此事件通知应用程序后，应用程序可以不立即处理该事件。这样，当应用程序下一次调用 epoll_wait 时，epoll_wait 还会再次向应用程序通告此事件，直到该事件被处理。而对于采用 ET 工作模式的文件描述符，当 epoll_wait 检测到其上有事件发生并将此事件通知应用程序后，应用程序必须立即处理该事件，因为后续的 epoll_wait 调用将不再向应用程序通知这一事件。可见，ET 模式在很大程度上降低了同一个 epoll 事件被重复触发的次数，因此效率要比 LT 模式高
