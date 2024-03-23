@@ -164,3 +164,7 @@
    * LT: Level Trigger，电平触发。该模式是默认的工作模式，这种模式下 epoll 相当于一个效率较高的 poll
    * ET: Edge Trigger，边沿触发。当往 epoll 内核事件表中注册一个文件描述符上的 EPOLLET 事件是，epoll 将以 ET 模式来操作该文件描述符。ET 模式是 epoll 的高效工作模式
 2. 对于采用 LT 工作模式的文件描述符，当 epoll_wait 检测到其上有事件发生并将此事件通知应用程序后，应用程序可以不立即处理该事件。这样，当应用程序下一次调用 epoll_wait 时，epoll_wait 还会再次向应用程序通告此事件，直到该事件被处理。而对于采用 ET 工作模式的文件描述符，当 epoll_wait 检测到其上有事件发生并将此事件通知应用程序后，应用程序必须立即处理该事件，因为后续的 epoll_wait 调用将不再向应用程序通知这一事件。可见，ET 模式在很大程度上降低了同一个 epoll 事件被重复触发的次数，因此效率要比 LT 模式高
+
+### 9.3.4 EPOLLONSHOT 事件
+
+对于注册了 EPOLLONSHOT 事件的文件描述符，操作系统最多触发其上注册的一个可读、可写或者异常事件，且只触发一次，除非我们使用 epoll_ctl 函数重置该文件描述符上注册的 EPOLLONSHOT 事件。这样，当一个线程在处理某个 socket 时，其他线程是不可能有机会操作该 socket 的。但反过来思考，注册了 EPOLLONSHOT 事件的 socket 一旦被某个线程处理完毕，该线程应该立即重置这个 socket 上的 EPOLLONSHOT 事件，以确保这个 socket 下一次可读，其 EPOLLIN 事件能被触发，进而让其他工作线程有机会继续处理这个 socket
