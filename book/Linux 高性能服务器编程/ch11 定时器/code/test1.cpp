@@ -1,6 +1,6 @@
 /**
  * @file test1.cpp
- * @brief 使用 SO_SNDTIMEO 选项来定时
+ * @brief 设置 connect 超时时间
  * @version 0.1
  * @date 2022-09-21
  */
