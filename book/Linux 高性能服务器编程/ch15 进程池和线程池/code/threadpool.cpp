@@ -2,10 +2,8 @@
 
 template <typename T>
 ThreadPool<T>::ThreadPool(int thread_number, int max_requests)
-    : m_thread_number(thread_number),
-      m_max_requests(max_requests),
-      m_stop(false),
-      m_threads(NULL) {
+    : m_thread_number(thread_number), m_max_requests(max_requests),
+      m_stop(false), m_threads(NULL) {
   if ((thread_number <= 0) || (max_requests <= 0)) {
     throw std::exception();
   }
@@ -30,14 +28,12 @@ ThreadPool<T>::ThreadPool(int thread_number, int max_requests)
   }
 }
 
-template <typename T>
-ThreadPool<T>::~ThreadPool() {
+template <typename T> ThreadPool<T>::~ThreadPool() {
   delete[] m_threads;
   m_stop = true;
 }
 
-template <typename T>
-bool ThreadPool<T>::append(T* request) {
+template <typename T> bool ThreadPool<T>::append(T *request) {
   // 操作工作队列时一定要加锁，因为它被所有线程共享
   m_queuelocker.lock();
   if (m_workqueue.size() > m_max_requests) {
@@ -50,16 +46,14 @@ bool ThreadPool<T>::append(T* request) {
   return true;
 }
 
-template <typename T>
-void* ThreadPool<T>::worker(void* arg) {
-  ThreadPool* pool = (thread_local*)arg;
+template <typename T> void *ThreadPool<T>::worker(void *arg) {
+  ThreadPool *pool = (ThreadPool *)arg;
   pool->run();
 
   return pool;
 }
 
-template <typename T>
-void ThreadPool<T>::run() {
+template <typename T> void ThreadPool<T>::run() {
   while (!m_stop) {
     m_queuestat.wait();
     m_queuelocker.lock();
@@ -69,11 +63,12 @@ void ThreadPool<T>::run() {
       continue;
     }
 
-    T* request = m_workqueue.front();
+    T *request = m_workqueue.front();
     m_workqueue.pop_front();
     m_queuelocker.unlock();
 
-    if (!request) continue;
+    if (!request)
+      continue;
 
     request->process();
   }
